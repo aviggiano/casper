@@ -1,66 +1,33 @@
-## Foundry
+# Casper
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
-
-Foundry consists of:
-
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
+Casper is a Solidity Ghost Variables Library
 
 ## Usage
 
-### Build
+```solidity
+pragma solidity ^0.8.13;
 
-```shell
-$ forge build
-```
+import {Test} from "forge-std/Test.sol";
+import {Counter} from "../src/Counter.sol";
+import {Ghosts} from "../src/Ghosts.sol";
 
-### Test
+contract CounterTest is Test, Ghosts {
+    Counter public counter;
 
-```shell
-$ forge test
-```
+    function setUp() public {
+        counter = new Counter();
+        counter.setNumber(0);
+        _ghost("number", address(counter), abi.encodeCall(counter.number, ()));
+    }
 
-### Format
+    function test_Increment() public ghosted("number") {
+        _call(address(counter), abi.encodeCall(counter.increment, ()));
+        assertEq(_afterUint256("number"), 1);
+    }
 
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+    function testFuzz_SetNumber(uint256 x) public ghosted("number") {
+        _call(address(counter), abi.encodeCall(counter.setNumber, (x)));
+        assertEq(_afterUint256("number"), x);
+    }
+}
 ```
