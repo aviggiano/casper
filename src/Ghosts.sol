@@ -36,6 +36,11 @@ contract Ghosts {
         _keys.add(key);
     }
 
+    function _ghost(bytes32 key, address target, function() external view returns(uint256) fn) public {
+        _ghosts[key] = Ghost({target: target, data: abi.encodeCall(fn, ()), b: bytes32(0), a: bytes32(0)});
+        _keys.add(key);
+    }
+
     function _call(address target, bytes memory data) internal {
         _ghosts[_ghosted].b = __snapshot(_ghosted);
         (bool success, bytes memory returnData) = target.call(data);
@@ -43,11 +48,11 @@ contract Ghosts {
         _ghosts[_ghosted].a = __snapshot(_ghosted);
     }
 
-    function _beforeUint256(bytes32 key) internal view returns (uint256) {
+    function _before(bytes32 key) internal view returns (uint256) {
         return uint256(_ghosts[key].b);
     }
 
-    function _afterUint256(bytes32 key) internal view returns (uint256) {
+    function _after(bytes32 key) internal view returns (uint256) {
         return uint256(_ghosts[key].a);
     }
 }

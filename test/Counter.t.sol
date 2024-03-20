@@ -11,16 +11,16 @@ contract CounterTest is Test, Ghosts {
     function setUp() public {
         counter = new Counter();
         counter.setNumber(0);
-        _ghost("number", address(counter), abi.encodeCall(counter.number, ()));
+        _ghost("number", address(counter), counter.number);
     }
 
     function test_Increment() public ghosted("number") {
         _call(address(counter), abi.encodeCall(counter.increment, ()));
-        assertEq(_afterUint256("number"), 1);
+        assertEq(_after("number"), 1);
     }
 
     function testFuzz_SetNumber(uint256 x) public ghosted("number") {
         _call(address(counter), abi.encodeCall(counter.setNumber, (x)));
-        assertEq(_afterUint256("number"), x);
+        assertEq(_after("number"), x);
     }
 }
